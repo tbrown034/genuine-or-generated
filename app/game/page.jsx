@@ -1,18 +1,25 @@
 import React from "react";
+import GameBoard from "./GameBoard";
 
 const Page = () => {
   return (
-    <div className="p-4 text-white">
-      <h2 className="mb-4 text-3xl font-bold">Science and Technology</h2>
-      <p className="mb-4">
-        Can you identify the real NASA Picture of the Days?
-      </p>
-      <p className="text-lg">
-        Rules: Below are the last five day's images from NASA's popular site.
-        But also below are computer-generated images using the metadata for the
-        real images. Can you identify the five real images?
-      </p>
-    </div>
+    <section className="flex flex-col items-center justify-center ">
+      <div className="p-4 mt-4 text-center">
+        <h1 className="text-4xl font-bold">Real or AI-Generated?</h1>
+        <p className="mt-4 text-2xl">
+          Can you tell which images are from NASA and which are AI-generated?
+        </p>
+        <p className="mt-4 text-lg leading-relaxed">
+          Below are images from NASA’s Picture of the Day for the last 10 days,
+          along with AI-generated counterparts using the same data. Your task is
+          to identify the real NASA photos among the fakes. The game begins as
+          soon as the images load below—no need to wait, just start guessing!
+        </p>
+      </div>
+      <div className="p-2 border-2">
+        <GameBoard />
+      </div>
+    </section>
   );
 };
 

@@ -9,7 +9,7 @@ const Header = () => {
     <nav className="flex items-center justify-between py-4">
       <Link
         href="/"
-        className="text-lg font-bold text-white hover:text-gray-400"
+        className="text-2xl font-bold text-white hover:text-gray-400"
       >
         NASA or Not
       </Link>
@@ -31,7 +31,7 @@ const Header = () => {
         <LoginButton />
       </div>
       <div className="flex sm:hidden">
-        <FontAwesomeIcon icon={faBars} className="h-6 text-white" />
+        <FontAwesomeIcon icon={faBars} className="text-white h-7" />
       </div>
     </nav>
   );
