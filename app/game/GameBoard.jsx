@@ -3,65 +3,70 @@
 import React, { useState, useEffect } from "react";
 
 const GameBoard = () => {
-  const [realImage, setRealImage] = useState(null);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [nasaImages, setNasaImages] = useState([]); // Storing real NASA images
+  const [aiGeneratedImages, setAiGeneratedImages] = useState([]); // Storing AI-generated images
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [fetchError, setFetchError] = useState(null); // Error state
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchAndGenerateImages = async () => {
       try {
-        const res = await fetch("/api/nasa");
-        const data = await res.json();
+        const nasaResponse = await fetch("/api/nasa");
+        const nasaData = await nasaResponse.json();
 
-        const todayImage = data[0]; // Get today's image
-        setRealImage(todayImage);
+        // Get the first three NASA images
+        const selectedNasaImages = nasaData.slice(0, 3);
+        setNasaImages(selectedNasaImages);
 
-        const generateRes = await fetch("/api/dalle", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ metadata: todayImage }),
-        });
+        const generatedImages = await Promise.all(
+          selectedNasaImages.map(async (imageMetadata) => {
+            const aiResponse = await fetch("/api/dalle", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ metadata: imageMetadata }),
+            });
 
-        const generateData = await generateRes.json();
-        setGeneratedImageUrl(generateData.imageUrl);
-      } catch (err) {
-        setError(err.message);
+            const aiData = await aiResponse.json();
+            return aiData.imageUrl;
+          })
+        );
+
+        setAiGeneratedImages(generatedImages);
+      } catch (error) {
+        setFetchError(error.message);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchImages();
+    fetchAndGenerateImages();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (isLoading) return <p>Loading...</p>;
+  if (fetchError) return <p>Error: {fetchError}</p>;
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-2">
-      {realImage && (
-        <div className="p-4 bg-gray-800 rounded-lg shadow-lg">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      {nasaImages.map((image, index) => (
+        <div key={index} className="p-4 bg-gray-800 rounded-lg shadow-lg">
+          <img src={image.url} alt={image.title} className="w-full h-auto" />
+          <p className="mt-2 text-center">{image.title}</p>
+        </div>
+      ))}
+      {aiGeneratedImages.map((url, index) => (
+        <div key={index} className="p-4 bg-gray-800 rounded-lg shadow-lg">
           <img
-            src={realImage.url}
-            alt={realImage.title}
+            src={url}
+            alt={`AI Generated Image ${index + 1}`}
             className="w-full h-auto"
           />
-          <p className="mt-2 text-center">{realImage.title}</p>
+          <p className="mt-2 text-center">{`AI Generated Image ${
+            index + 1
+          }`}</p>
         </div>
-      )}
-      {generatedImageUrl && (
-        <div className="p-4 bg-gray-800 rounded-lg shadow-lg">
-          <img
-            src={generatedImageUrl}
-            alt="AI Generated"
-            className="w-full h-auto"
-          />
-          <p className="mt-2 text-center">AI Generated Image</p>
-        </div>
-      )}
+      ))}
     </div>
   );
 };
